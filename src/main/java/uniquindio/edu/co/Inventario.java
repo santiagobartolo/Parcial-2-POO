@@ -72,4 +72,10 @@ public class Inventario {
         return this.cantidadDisponible == 0;
     }
 
+    public void aumentarStock(int cantidad) {
+        if (cantidad > 0) {
+            this.cantidadDisponible += cantidad;
+        }
+    }
+
 }

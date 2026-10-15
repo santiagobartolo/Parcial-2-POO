@@ -78,9 +78,18 @@ public class Sucursal {
         this.ventas = ventas;
     }
 
-    public void agregarInventario(Inventario inv) {
-        inventarios.add(inv);
+    public boolean agregarInventario(Inventario nuevoInv) {
+        for (Inventario inv : inventarios) {
+            if (inv.getPrenda().getCodigo().equalsIgnoreCase(nuevoInv.getPrenda().getCodigo()) &&
+                    inv.getTalla().equalsIgnoreCase(nuevoInv.getTalla()) &&
+                    inv.getColor().equalsIgnoreCase(nuevoInv.getColor())) {
+                return false; // Ya existe esa combinación exacta de inventario
+            }
+        }
+        inventarios.add(nuevoInv);
+        return true;
     }
+
     public void agregarVendedor(Vendedor v) {
         vendedores.add(v); }
     public void registrarVenta(Venta v) { ventas.add(v);
@@ -93,6 +102,14 @@ public class Sucursal {
         }
         return ingresos;
     }
+
+    public boolean existeVendedor(String documento) {
+        for (Vendedor v : vendedores) {
+            if (v.getDocumentoIdentidad().equals(documento)) return true;
+        }
+        return false;
+    }
+
 
 
 }
