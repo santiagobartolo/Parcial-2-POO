@@ -106,50 +106,85 @@ public class Aplicacion {
 
                 case 2:
                     System.out.println("\n--- REGISTRAR ACTOR (CLIENTE / VENDEDOR) ---");
-                    System.out.print("¿Desea registrar (1) Cliente o (2) Vendedor? ");
+                    System.out.println("1. Registrar Cliente");
+                    System.out.println("2. Registrar Vendedor");
+                    System.out.print("Seleccione el tipo de actor a registrar: ");
+
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Por favor, ingrese un número válido (1 o 2).");
+                        scanner.next();
+                    }
                     int tipoActor = scanner.nextInt();
-                    scanner.nextLine();
+                    scanner.nextLine(); // Limpiar buffer
+
+                    if (tipoActor != 1 && tipoActor != 2) {
+                        System.out.println("Error: Opción no válida. Ingrese 1 para Cliente o 2 para Vendedor.");
+                        break;
+                    }
 
                     System.out.print("Documento de identidad: ");
-                    String doc = scanner.nextLine();
+                    String doc = scanner.nextLine().trim();
+
+                    // Validación previa para no pedir el resto de datos si el documento ya existe
+                    if (modastyle.buscarClientePorDocumento(doc) != null || modastyle.buscarVendedorPorDocumento(doc) != null) {
+                        System.out.println("Error: Ya existe una persona (cliente o vendedor) registrada con el documento de identidad " + doc);
+                        break;
+                    }
+
                     System.out.print("Nombre completo: ");
-                    String nombre = scanner.nextLine();
+                    String nombre = scanner.nextLine().trim();
                     System.out.print("Correo electrónico: ");
-                    String correo = scanner.nextLine();
+                    String correo = scanner.nextLine().trim();
                     System.out.print("Número de teléfono: ");
-                    String telefono = scanner.nextLine();
+                    String telefono = scanner.nextLine().trim();
 
                     if (tipoActor == 1) {
                         System.out.print("Código de afiliación: ");
-                        String codAfiliacion = scanner.nextLine();
-                        System.out.println("Categorías cliente: BRONCE, PLATA, ORO");
+                        String codAfiliacion = scanner.nextLine().trim();
+
+                        System.out.println("Categorías de cliente disponibles: BRONCE, PLATA, ORO");
                         System.out.print("Ingrese categoría de cliente: ");
-                        String catCStr = scanner.next().toUpperCase();
-                        scanner.nextLine();
+                        String catCStr = scanner.next().toUpperCase().trim();
+                        scanner.nextLine(); 
 
                         try {
                             CategoriaCliente catC = CategoriaCliente.valueOf(catCStr);
                             Cliente nuevoCliente = new Cliente(doc, nombre, correo, telefono, codAfiliacion, catC);
 
-                            // Validar duplicado en sucursal o general (ejemplo simulado de validación por documento)
-                            System.out.println("¡Cliente registrado exitosamente!");
+                            boolean clienteRegistrado = modastyle.registrarCliente(nuevoCliente);
+                            if (clienteRegistrado) {
+                                System.out.println("¡Cliente registrado exitosamente en la empresa!");
+                            } else {
+                                System.out.println("Error: Ya existe un cliente registrado con ese documento de identidad o código de afiliación.");
+                            }
                         } catch (IllegalArgumentException e) {
-                            System.out.println("Error: Categoría de cliente inválida.");
+                            System.out.println("Error: Categoría de cliente no válida. Intente con BRONCE, PLATA u ORO.");
                         }
-                    } else if (tipoActor == 2) {
+
+                    } else {
                         System.out.print("Código de empleado: ");
-                        String codEmp = scanner.nextLine();
+                        String codEmp = scanner.nextLine().trim();
                         System.out.print("Fecha de contratación (YYYY-MM-DD): ");
-                        String fechaContratacion = scanner.nextLine();
+                        String fechaContratacion = scanner.nextLine().trim();
                         System.out.print("Salario básico: ");
+
+                        while (!scanner.hasNextDouble()) {
+                            System.out.println("Por favor, ingrese un número válido para el salario.");
+                            scanner.next();
+                        }
                         double salario = scanner.nextDouble();
-                        scanner.nextLine();
+                        scanner.nextLine(); // Limpiar buffer
 
                         Vendedor nuevoVendedor = new Vendedor(doc, nombre, correo, telefono, codEmp, fechaContratacion, salario);
-                        sucursalArmenia.agregarVendedor(nuevoVendedor);
-                        System.out.println("¡Vendedor registrado exitosamente en la sucursal Armenia!");
-                    } else {
-                        System.out.println("Opción inválida.");
+
+                        boolean vendedorRegistrado = modastyle.registrarVendedorGlobal(nuevoVendedor);
+                        if (vendedorRegistrado) {
+
+                            sucursalArmenia.agregarVendedor(nuevoVendedor);
+                            System.out.println("¡Vendedor registrado exitosamente en la empresa y asignado a la sucursal!");
+                        } else {
+                            System.out.println("Error: Ya existe un vendedor registrado con ese documento de identidad o código de empleado.");
+                        }
                     }
                     break;
 
